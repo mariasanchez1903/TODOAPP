@@ -1,2 +1,0 @@
-# TODOAPP
-Realizado en kotlin
