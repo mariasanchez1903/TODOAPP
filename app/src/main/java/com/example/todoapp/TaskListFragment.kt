@@ -7,15 +7,17 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todoapp.models.Task
 import com.example.todoapp.models.TaskAdapter
+import com.example.todoapp.models.TaskViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TaskListFragment : Fragment() {
-    private val taskList = mutableListOf<Task>()
+    private val viewModel: TaskViewModel by activityViewModels() // Usar el ViewModel
     private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(
@@ -23,16 +25,21 @@ class TaskListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_task_list, container, false)
-        
+
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view_tasks)
-        taskAdapter = TaskAdapter(taskList, { task -> navigateToTaskDetail(task) }, { task, isChecked ->
-            task.isCompleted = isChecked
+        taskAdapter = TaskAdapter(viewModel.tasks.value ?: emptyList(), { task -> navigateToTaskDetail(task) }, { task, isChecked ->
             if (isChecked) {
-                moveToCompletedTasks(task)
+                viewModel.completeTask(task) // Mover la tarea a completada usando el ViewModel
             }
         })
+
         recyclerView.adapter = taskAdapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // Observa los cambios en la lista de tareas
+        viewModel.tasks.observe(viewLifecycleOwner) { tasks ->
+            taskAdapter.updateTasks(tasks)
+        }
 
         view.findViewById<FloatingActionButton>(R.id.fab_add_task).setOnClickListener {
             showAddTaskDialog()
@@ -43,11 +50,6 @@ class TaskListFragment : Fragment() {
         }
 
         return view
-    }
-
-    private fun moveToCompletedTasks(task: Task) {
-        taskList.remove(task)
-        taskAdapter.notifyDataSetChanged()
     }
 
     private fun showAddTaskDialog() {
@@ -63,8 +65,7 @@ class TaskListFragment : Fragment() {
                 val description = descriptionInput.text.toString()
                 if (title.isNotBlank()) {
                     val newTask = Task(title, description, false)
-                    taskList.add(newTask)
-                    taskAdapter.notifyItemInserted(taskList.size - 1)
+                    viewModel.addTask(newTask) // Usar el ViewModel para agregar la tarea
                 }
                 dialogInterface.dismiss()
             }

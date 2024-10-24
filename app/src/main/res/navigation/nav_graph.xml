@@ -15,14 +15,18 @@
             app:destination="@id/taskDetailFragment" />
         <action
             android:id="@+id/action_taskListFragment_to_completedTaskFragment"
-            app:destination="@id/completedTaskFragment" />
+            app:destination="@id/completedTasksFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/completedTaskFragment"
-        android:name="com.example.todoapp.CompletedTaskFragment"
-        android:label="Tareas Completadas"
-        tools:layout="@layout/fragment_completed_tasks" />
+        android:id="@+id/completedTasksFragment"
+        android:name="com.example.todoapp.CompletedTasksFragment"
+        tools:layout="@layout/fragment_completed_tasks">
+
+        <action
+            android:id="@+id/action_completedTasksFragment_to_taskDetailFragment"
+            app:destination="@id/taskDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/taskDetailFragment"

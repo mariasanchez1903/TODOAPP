@@ -10,7 +10,7 @@ import com.example.todoapp.R
 
 
 class TaskAdapter(
-    private val tasks: List<Task>,
+    private var tasks: List<Task>,
     private val onTaskClick: (Task) -> Unit,
     private val onTaskChecked: (Task, Boolean) -> Unit
 ) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
@@ -19,6 +19,10 @@ class TaskAdapter(
         val title: TextView = itemView.findViewById(R.id.task_title)
         val description: TextView = itemView.findViewById(R.id.task_description)
         val checkBox: CheckBox = itemView.findViewById(R.id.task_checkbox)
+    }
+    fun updateTasks(newTasks: List<Task>) {
+        tasks = newTasks
+        notifyDataSetChanged() // Notifica al adaptador que la lista ha cambiado
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
@@ -42,4 +46,5 @@ class TaskAdapter(
     }
 
     override fun getItemCount(): Int = tasks.size
+
 }
