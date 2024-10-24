@@ -1,44 +1,45 @@
 package com.example.todoapp.models
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
-import com.example.todoapp.databinding.ItemTaskBinding
+import android.widget.CheckBox
+import android.widget.TextView
 
-class TaskAdapter(private val onTaskComplete: (Task) -> Unit) :
-    ListAdapter<Task, TaskAdapter.TaskViewHolder>(TaskDiffCallback()) {
+import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.R
+
+
+class TaskAdapter(
+    private val tasks: List<Task>,
+    private val onTaskClick: (Task) -> Unit,
+    private val onTaskChecked: (Task, Boolean) -> Unit
+) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+
+    inner class TaskViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val title: TextView = itemView.findViewById(R.id.task_title)
+        val description: TextView = itemView.findViewById(R.id.task_description)
+        val checkBox: CheckBox = itemView.findViewById(R.id.task_checkbox)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        val binding = ItemTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return TaskViewHolder(binding)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_task, parent, false)
+        return TaskViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
-        val task = getItem(position)
-        holder.bind(task, onTaskComplete)
-    }
+        val task = tasks[position]
+        holder.title.text = task.title
+        holder.description.text = task.description
+        holder.checkBox.isChecked = task.isCompleted
 
-    class TaskViewHolder(private val binding: ItemTaskBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(task: Task, onTaskComplete: (Task) -> Unit) {
-            binding.taskTitle.text = task.title
-            binding.taskDescription.text = task.description
-            binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    onTaskComplete(task)
-                }
-            }
+        holder.itemView.setOnClickListener {
+            onTaskClick(task)
+        }
+
+        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+            onTaskChecked(task, isChecked)
         }
     }
 
-    class TaskDiffCallback : DiffUtil.ItemCallback<Task>() {
-        override fun areItemsTheSame(oldItem: Task, newItem: Task): Boolean {
-            return oldItem.id == newItem.id // Asegúrate de que Task tenga un id único
-        }
-
-        override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
-            return oldItem == newItem
-        }
-    }
+    override fun getItemCount(): Int = tasks.size
 }
-

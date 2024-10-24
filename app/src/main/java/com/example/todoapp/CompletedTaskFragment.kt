@@ -5,33 +5,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import com.example.todoapp.databinding.FragmentCompletedTaskBinding
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.todoapp.models.Task
 import com.example.todoapp.models.TaskAdapter
-import com.example.todoapp.models.TaskViewModel
+
 
 class CompletedTaskFragment : Fragment() {
-
-    private lateinit var taskViewModel: TaskViewModel
-    private lateinit var adapter: TaskAdapter
-    private lateinit var binding: FragmentCompletedTaskBinding
+    private val completedTaskList = mutableListOf<Task>()
+    private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentCompletedTaskBinding.inflate(inflater, container, false)
+        val view = inflater.inflate(R.layout.fragment_completed_tasks, container, false)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view_completed_tasks)
+        taskAdapter = TaskAdapter(completedTaskList, {}, { _, _ -> })
+        recyclerView.adapter = taskAdapter
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        taskViewModel = ViewModelProvider(requireActivity()).get(TaskViewModel::class.java)
-
-        adapter = TaskAdapter { /* No se pueden descompletar aquí */ }
-        binding.recyclerView.adapter = adapter
-
-        taskViewModel.completedTasks.observe(viewLifecycleOwner) { completedTasks ->
-            adapter.submitList(completedTasks)
-        }
-
-        return binding.root
+        return view
     }
 }
-
