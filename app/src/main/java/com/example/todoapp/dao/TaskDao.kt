@@ -11,7 +11,8 @@ import com.example.todoapp.models.Task
 
 @Dao
 interface TaskDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTask(task: Task)
 
     @Update
@@ -21,7 +22,7 @@ interface TaskDao {
     suspend fun deleteTask(task: Task)
 
     @Query("SELECT * FROM tasks WHERE id = :taskId")
-    suspend fun getTaskById(taskId: Int): Task
+    suspend fun getTaskById(taskId: Int): Task?
 
     @Query("SELECT * FROM tasks")
     fun getAllTasks(): LiveData<List<Task>>
