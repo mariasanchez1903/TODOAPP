@@ -17,7 +17,7 @@ import com.example.todoapp.models.TaskViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TaskListFragment : Fragment() {
-    private val viewModel: TaskViewModel by activityViewModels() // Usar el ViewModel
+    private val viewModel: TaskViewModel by activityViewModels()
     private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(
@@ -27,24 +27,24 @@ class TaskListFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_task_list, container, false)
 
         val recyclerView = view.findViewById<RecyclerView>(R.id.recycler_view_tasks)
-        taskAdapter = TaskAdapter(viewModel.tasks.value ?: emptyList(), { task -> navigateToTaskDetail(task) }, { task, isChecked ->
+        taskAdapter = TaskAdapter(viewModel.allTasks.value ?: emptyList(), { task ->
+            navigateToTaskDetail(task)
+        }, { task, isChecked ->
             if (isChecked) {
-                viewModel.completeTask(task) // Mover la tarea a completada usando el ViewModel
+                viewModel.completeTask(task)
             }
         })
 
         recyclerView.adapter = taskAdapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Observa los cambios en la lista de tareas
-        viewModel.tasks.observe(viewLifecycleOwner) { tasks ->
+        viewModel.allTasks.observe(viewLifecycleOwner) { tasks -> // Cambia tasks por allTasks
             taskAdapter.updateTasks(tasks)
         }
 
         view.findViewById<FloatingActionButton>(R.id.fab_add_task).setOnClickListener {
             showAddTaskDialog()
         }
-
         view.findViewById<View>(R.id.btn_completed_tasks).setOnClickListener {
             findNavController().navigate(R.id.action_taskListFragment_to_completedTaskFragment)
         }
@@ -53,7 +53,8 @@ class TaskListFragment : Fragment() {
     }
 
     private fun showAddTaskDialog() {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_task, null)
+        val dialogView =
+            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_task, null)
         val titleInput = dialogView.findViewById<EditText>(R.id.et_task_title)
         val descriptionInput = dialogView.findViewById<EditText>(R.id.et_task_description)
 
@@ -64,8 +65,8 @@ class TaskListFragment : Fragment() {
                 val title = titleInput.text.toString()
                 val description = descriptionInput.text.toString()
                 if (title.isNotBlank()) {
-                    val newTask = Task(title, description, false)
-                    viewModel.addTask(newTask) // Usar el ViewModel para agregar la tarea
+                    val newTask = Task(id = 0, title = title, description = description, isCompleted = false)
+                    viewModel.addTask(newTask)
                 }
                 dialogInterface.dismiss()
             }
